@@ -1,0 +1,19 @@
+# Этап 1: сборка
+FROM golang:1.23 AS build
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY *.go ./
+RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping
+
+# Этап 2: запуск
+FROM gcr.io/distroless/static-debian12:nonroot
+
+COPY --from=build /docker-gs-ping /docker-gs-ping
+
+EXPOSE 8080
+ENTRYPOINT ["/docker-gs-ping"]
+

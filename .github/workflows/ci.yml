@@ -15,3 +15,12 @@ jobs:
       - run: go build ./...
       - run: go test ./...
       - run: docker build -f Dockerfile.mine -t docker-gs-ping:ci .
+      - name: Smoke test
+        run: |
+          docker compose up -d --build
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:8090/health && exit 0
+            sleep 1
+          done
+          docker compose logs
+          exit 1
